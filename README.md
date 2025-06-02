@@ -1,197 +1,154 @@
-# JRapidTesting Framework
+# JRapidTesting
 
-A powerful and flexible Selenium-based testing framework for web applications, with built-in support for CRUD operations and authentication.
+A Java-based Selenium testing framework for rapid test automation development. This framework provides a structured approach to creating and maintaining automated tests with a focus on reusability and maintainability.
 
 ## Features
 
-- **Multi-Browser Support**: Test your application across different browsers (Chrome, Firefox, Edge, Safari)
-- **CRUD Testing**: Built-in support for Create, Read, Update, and Delete operations
-- **Authentication**: Flexible authentication handling with configurable login/logout flows
-- **Configurable**: Easy to configure and extend for different testing scenarios
-- **Clean Architecture**: Well-structured, maintainable, and reusable code
+- **Base Test Classes**
+  - `BaseSeleniumTest`: Core Selenium functionality
+  - `BaseCrudScenario`: Common CRUD operations
+  - `BaseAuthenticatedCrudScenario`: Authentication and CRUD operations
+  - `BaseLoginTest`: Login functionality testing
 
-## Framework Structure
+- **Common Components**
+  - `CommonLocators`: Centralized management of web element locators
+  - `AuthConfig`: Authentication configuration
+  - `AuthLocators`: Authentication-related locators
+
+- **Test Scenarios**
+  - User Management Testing
+  - Authentication Testing
+  - CRUD Operations Testing
+
+## Project Structure
 
 ```
 src/
 ├── main/java/com/jrapidtesting/selenium/
-│   ├── BaseSeleniumTest.java           # Base class for Selenium tests
-│   └── crud/
-│       ├── BaseCrudScenario.java       # Base class for CRUD operations
-│       └── BaseAuthenticatedCrudScenario.java  # Base class for authenticated CRUD operations
+│   ├── common/
+│   │   └── CommonLocators.java
+│   ├── crud/
+│   │   ├── BaseCrudScenario.java
+│   │   ├── BaseAuthenticatedCrudScenario.java
+│   │   ├── AuthConfig.java
+│   │   └── AuthLocators.java
+│   └── auth/
+│       └── BaseLoginTest.java
 └── test/java/com/jrapidtesting/selenium/
-    └── crud/
-        └── UserManagementTest.java     # Example test implementation
+    ├── crud/
+    │   └── UserManagementTest.java
+    └── auth/
+        └── LoginTest.java
 ```
 
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Java 8 or higher
 - Maven
-- WebDriver executables for your target browsers
+- WebDriver for your target browsers (Chrome, Firefox, Edge, Safari)
 
-### Dependencies
+## Setup
 
-Add the following dependencies to your `pom.xml`:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/JRapidTesting.git
+   cd JRapidTesting
+   ```
 
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.seleniumhq.selenium</groupId>
-        <artifactId>selenium-java</artifactId>
-        <version>4.x.x</version>
-    </dependency>
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>5.x.x</version>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
-```
+2. Install dependencies:
+   ```bash
+   mvn clean install
+   ```
+
+3. Configure your test environment:
+   - Update `application.properties` with your test environment details
+   - Configure browser drivers in your system PATH
 
 ## Usage
 
-### Basic CRUD Testing
+### Creating a New Test Class
 
-1. Create a test class extending `BaseCrudScenario`:
+1. Extend the appropriate base class:
+   ```java
+   public class MyTest extends BaseCrudScenario {
+       // Your test implementation
+   }
+   ```
 
-```java
-public class YourTest extends BaseCrudScenario {
-    @Override
-    protected void setupTestData() {
-        super.setupTestData();
-        
-        // Configure your test data
-        testData.put("baseUrl", "http://your-app.com");
-        testData.put("searchTerm", "test data");
-        
-        // Override locators if needed
-        addButton = By.id("your-add-button");
-        editButton = By.id("your-edit-button");
-        // ... other locators
-    }
-    
-    @Test
-    public void testCreate() {
-        navigateToCrudPage((String) testData.get("baseUrl"));
-        
-        Map<By, String> data = new HashMap<>();
-        data.put(By.id("field1"), "value1");
-        data.put(By.id("field2"), "value2");
-        
-        createRecord(data);
-        assertTrue(verifyRecordExists("value1"));
-    }
-}
+2. Configure locators:
+   ```java
+   @Override
+   protected void setupTestData() {
+       super.setupTestData();
+       locators = new CommonLocators()
+           .withAddButton(By.id("custom-add-button"))
+           .withEditButton(By.className("custom-edit-btn"));
+   }
+   ```
+
+3. Implement test methods:
+   ```java
+   @Test
+   public void testCreateRecord() {
+       Map<By, String> data = new HashMap<>();
+       data.put(fieldLocator, "value");
+       createRecord(data);
+   }
+   ```
+
+### Running Tests
+
+Run all tests:
+```bash
+mvn test
 ```
 
-### Authenticated CRUD Testing
-
-1. Create a test class extending `BaseAuthenticatedCrudScenario`:
-
-```java
-public class YourAuthTest extends BaseAuthenticatedCrudScenario {
-    @Override
-    protected void setupTestData() {
-        super.setupTestData();
-        
-        // Configure authentication
-        configureAuth(new AuthConfig(
-            "username",
-            "password",
-            "http://your-app.com/login"
-        )
-        .withDashboardUrl("/dashboard")
-        .withLoginSuccessUrl("/dashboard")
-        .withLogoutSuccessUrl("/login"));
-        
-        // Configure authentication locators
-        configureAuthLocators(new AuthLocators()
-            .withUsernameInput(By.id("username-field"))
-            .withPasswordInput(By.id("password-field"))
-            .withLoginButton(By.id("login-button"))
-            .withLogoutButton(By.id("logout-button")));
-    }
-}
+Run specific test class:
+```bash
+mvn test -Dtest=UserManagementTest
 ```
 
-### Browser Selection
-
-You can specify the browser to use in several ways:
-
-1. **Default Browser for All Tests**:
-```java
-@Override
-protected void setupTestData() {
-    setBrowserType(BrowserType.FIREFOX);
-    super.setupTestData();
-}
+Run specific test method:
+```bash
+mvn test -Dtest=UserManagementTest#testCreateUser
 ```
-
-2. **Per-Test Browser Selection**:
-```java
-@Test
-public void testWithChrome() {
-    setBrowserType(BrowserType.CHROME);
-    // Your test code
-}
-```
-
-3. **Test with All Browsers**:
-```java
-@ParameterizedTest
-@EnumSource(BrowserType.class)
-public void testWithAllBrowsers(BrowserType browserType) {
-    setBrowserType(browserType);
-    // Your test code
-}
-```
-
-## Key Features
-
-### CRUD Operations
-
-- `createRecord()`: Create new records
-- `updateRecord()`: Update existing records
-- `deleteRecord()`: Delete records
-- `searchRecord()`: Search for records
-- `verifyRecordExists()`: Verify record presence
-- `verifyRecordContent()`: Verify record content
-
-### Authentication
-
-- `loginAsAdmin()`: Login with admin credentials
-- `logout()`: Logout from the application
-- `isLoggedIn()`: Check login status
-- `ensureLoggedIn()`: Ensure user is logged in
-
-### Browser Management
-
-- Support for Chrome, Firefox, Edge, and Safari
-- Easy browser selection and configuration
-- Parameterized testing across browsers
 
 ## Best Practices
 
-1. **Configuration**:
-   - Keep test data in `setupTestData()`
-   - Override locators in `setupTestData()`
-   - Use meaningful test data keys
+1. **Locator Management**
+   - Use `CommonLocators` for shared locators
+   - Keep page-specific locators in test classes
+   - Use meaningful names for locator variables
 
-2. **Authentication**:
-   - Configure authentication in `setupTestData()`
-   - Use appropriate wait conditions
-   - Handle session timeouts
+2. **Test Data**
+   - Store test data in `setupTestData()`
+   - Use meaningful data values
+   - Clean up test data after tests
 
-3. **Browser Selection**:
-   - Set default browser in `setupTestData()`
-   - Override browser for specific tests when needed
-   - Use parameterized tests for cross-browser testing
+3. **Assertions**
+   - Use descriptive assertion messages
+   - Verify both positive and negative scenarios
+   - Check for element visibility and content
 
-4. **Test Organization**:
-   - Group related tests together
-   - Use descriptive test names
-   - Follow the Arrange-Act-Assert pattern
+4. **Browser Support**
+   - Test across multiple browsers
+   - Use `@ParameterizedTest` for cross-browser testing
+   - Handle browser-specific behaviors
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Selenium WebDriver
+- JUnit 5
+- Maven

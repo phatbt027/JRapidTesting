@@ -1,6 +1,7 @@
 package com.jrapidtesting.selenium.crud;
 
 import com.jrapidtesting.selenium.BaseSeleniumTest;
+import com.jrapidtesting.selenium.common.CommonLocators;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,16 +17,8 @@ import java.util.HashMap;
  */
 public abstract class BaseCrudScenario extends BaseSeleniumTest {
     
-    // Common locators - can be overridden by subclasses
-    protected By addButton = By.id("add-button");
-    protected By editButton = By.id("edit-button");
-    protected By deleteButton = By.id("delete-button");
-    protected By saveButton = By.id("save-button");
-    protected By cancelButton = By.id("cancel-button");
-    protected By confirmDeleteButton = By.id("confirm-delete-button");
-    protected By searchInput = By.id("search-input");
-    protected By searchButton = By.id("search-button");
-    protected By tableRows = By.cssSelector("table tbody tr");
+    // Common locators instance
+    protected CommonLocators locators;
     
     // Test data storage
     protected Map<String, Object> testData;
@@ -39,6 +32,8 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
         initDriver(browserType);
         // Initialize test data
         testData = new HashMap<>();
+        // Initialize common locators
+        locators = new CommonLocators();
         // Setup test data
         setupTestData();
     }
@@ -74,7 +69,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * Click the add button to create a new record
      */
     protected void clickAddButton() {
-        WebElement addBtn = wait.until(ExpectedConditions.elementToBeClickable(addButton));
+        WebElement addBtn = wait.until(ExpectedConditions.elementToBeClickable(locators.getAddButton()));
         addBtn.click();
     }
     
@@ -93,7 +88,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * Click the save button
      */
     protected void clickSaveButton() {
-        WebElement saveBtn = wait.until(ExpectedConditions.elementToBeClickable(saveButton));
+        WebElement saveBtn = wait.until(ExpectedConditions.elementToBeClickable(locators.getSaveButton()));
         saveBtn.click();
     }
     
@@ -101,7 +96,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * Click the cancel button
      */
     protected void clickCancelButton() {
-        WebElement cancelBtn = wait.until(ExpectedConditions.elementToBeClickable(cancelButton));
+        WebElement cancelBtn = wait.until(ExpectedConditions.elementToBeClickable(locators.getCancelButton()));
         cancelBtn.click();
     }
     
@@ -110,11 +105,11 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * @param searchTerm The term to search for
      */
     protected void searchRecord(String searchTerm) {
-        WebElement searchField = wait.until(ExpectedConditions.presenceOfElementLocated(searchInput));
+        WebElement searchField = wait.until(ExpectedConditions.presenceOfElementLocated(locators.getSearchInput()));
         searchField.clear();
         searchField.sendKeys(searchTerm);
         
-        WebElement searchBtn = wait.until(ExpectedConditions.elementToBeClickable(searchButton));
+        WebElement searchBtn = wait.until(ExpectedConditions.elementToBeClickable(locators.getSearchButton()));
         searchBtn.click();
     }
     
@@ -123,7 +118,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * @return List of table row elements
      */
     protected List<WebElement> getTableRows() {
-        return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(tableRows));
+        return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locators.getTableRows()));
     }
     
     /**
@@ -146,7 +141,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * @param row The row element
      */
     protected void clickEditButton(WebElement row) {
-        WebElement editBtn = row.findElement(editButton);
+        WebElement editBtn = row.findElement(locators.getEditButton());
         editBtn.click();
     }
     
@@ -155,7 +150,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * @param row The row element
      */
     protected void clickDeleteButton(WebElement row) {
-        WebElement deleteBtn = row.findElement(deleteButton);
+        WebElement deleteBtn = row.findElement(locators.getDeleteButton());
         deleteBtn.click();
     }
     
@@ -163,7 +158,7 @@ public abstract class BaseCrudScenario extends BaseSeleniumTest {
      * Confirm deletion
      */
     protected void confirmDelete() {
-        WebElement confirmBtn = wait.until(ExpectedConditions.elementToBeClickable(confirmDeleteButton));
+        WebElement confirmBtn = wait.until(ExpectedConditions.elementToBeClickable(locators.getConfirmDeleteButton()));
         confirmBtn.click();
     }
     

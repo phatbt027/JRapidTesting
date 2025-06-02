@@ -1,5 +1,6 @@
 package com.jrapidtesting.selenium.crud;
 
+import com.jrapidtesting.selenium.common.CommonLocators;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -13,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Extends BaseAuthenticatedCrudScenario to include login functionality.
  */
 public class UserManagementTest extends BaseAuthenticatedCrudScenario {
+    
+    // User-specific locators
+    private By usernameInput = By.id("username");
+    private By emailInput = By.id("email");
+    private By roleInput = By.id("role");
     
     @Override
     protected void setupTestData() {
@@ -44,16 +50,17 @@ public class UserManagementTest extends BaseAuthenticatedCrudScenario {
         testData.put("email", "test@example.com");
         testData.put("role", "User");
         
-        // Override default locators if needed
-        addButton = By.id("add-user-button");
-        editButton = By.className("edit-user-btn");
-        deleteButton = By.className("delete-user-btn");
-        saveButton = By.id("save-user-button");
-        cancelButton = By.id("cancel-user-button");
-        confirmDeleteButton = By.id("confirm-delete-user-button");
-        searchInput = By.id("user-search-input");
-        searchButton = By.id("user-search-button");
-        tableRows = By.cssSelector("#user-table tbody tr");
+        // Configure common locators for user management
+        locators = new CommonLocators()
+            .withAddButton(By.id("add-user-button"))
+            .withEditButton(By.className("edit-user-btn"))
+            .withDeleteButton(By.className("delete-user-btn"))
+            .withSaveButton(By.id("save-user-button"))
+            .withCancelButton(By.id("cancel-user-button"))
+            .withConfirmDeleteButton(By.id("confirm-delete-user-button"))
+            .withSearchInput(By.id("user-search-input"))
+            .withSearchButton(By.id("user-search-button"))
+            .withTableRows(By.cssSelector("#user-table tbody tr"));
     }
     
     /**
@@ -123,9 +130,9 @@ public class UserManagementTest extends BaseAuthenticatedCrudScenario {
         
         // Prepare user data
         Map<By, String> userData = new HashMap<>();
-        userData.put(By.id("username"), (String) testData.get("username"));
-        userData.put(By.id("email"), (String) testData.get("email"));
-        userData.put(By.id("role"), (String) testData.get("role"));
+        userData.put(usernameInput, (String) testData.get("username"));
+        userData.put(emailInput, (String) testData.get("email"));
+        userData.put(roleInput, (String) testData.get("role"));
         
         // Create new user
         createRecord(userData);
@@ -142,8 +149,8 @@ public class UserManagementTest extends BaseAuthenticatedCrudScenario {
         
         // Prepare updated user data
         Map<By, String> updatedData = new HashMap<>();
-        updatedData.put(By.id("email"), "updated@example.com");
-        updatedData.put(By.id("role"), "Admin");
+        updatedData.put(emailInput, "updated@example.com");
+        updatedData.put(roleInput, "Admin");
         
         // Update user
         updateRecord((String) testData.get("username"), updatedData);
@@ -191,8 +198,8 @@ public class UserManagementTest extends BaseAuthenticatedCrudScenario {
         
         // Fill in some data
         Map<By, String> userData = new HashMap<>();
-        userData.put(By.id("username"), "cancelleduser");
-        userData.put(By.id("email"), "cancel@example.com");
+        userData.put(usernameInput, "cancelleduser");
+        userData.put(emailInput, "cancel@example.com");
         
         for (Map.Entry<By, String> entry : userData.entrySet()) {
             fillField(entry.getKey(), entry.getValue());
